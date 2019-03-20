@@ -26,7 +26,7 @@ const demoSchema = new Schema({
 const Demo = mongoose.model('Demo', demoSchema);
 
 console.log(process.env);
-mongoose.connect(`mongodb://${process.env.DB_USER}:${process.env.DB_PWD}@${process.env.DB_HOST}:${process.env.DB_PORT}/demo?authSource=admin`).then(() => {
+mongoose.connect(`mongodb://${process.env.DB_USER}:${process.env.DB_PWD}@${process.env.DB_HOST}/admin`).then(() => {
   console.log('Connected successfully.');
   app.listen(process.env.APP_PORT);
 }, err => {
