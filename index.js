@@ -9,9 +9,9 @@ const path = require('path');
 const dotenv = require('dotenv');
 const mongojs = require('mongojs');
 const ObjectId = require('mongodb').ObjectID;
-
 const Schema = mongoose.Schema;
 
+//testing
 /*
 const blogSchema = new Schema({
   title: String,
@@ -26,7 +26,7 @@ const blogSchema = new Schema({
   }
 });*/
 
-
+//model for cat
 const catSchema = new Schema({
   name: String,
   age: Number,
@@ -37,7 +37,7 @@ const catSchema = new Schema({
 const Cat = mongoose.model('cat', catSchema);
 
 //console.log(process.env);
-
+//connecting to DB
 mongoose.connect(`mongodb://${process.env.DB_USER}:${process.env.DB_PWD}@${process.env.DB_HOST}:${process.env.DB_PORT}/cat`).then(() => {
   console.log('Connected successfully.');
   app.listen(process.env.APP_PORT);
@@ -47,15 +47,14 @@ mongoose.connect(`mongodb://${process.env.DB_USER}:${process.env.DB_PWD}@${proce
 
 app.use(express.static('public'));
 
+
+//main view. 
 app.get('/', (req, res) => {
-  /*Demo.create({ test: 'Hello more data', more: 5 }).then(post => {
-      console.log(post.id);
-      res.send('created dummy data!' + post.id);
-    });*/
   res.send('whatsup!');
 });
 
 
+//getting all cats
 app.get('/all', (req, res) => {
   Cat.find().then(all => {
     console.log(all);
@@ -63,6 +62,8 @@ app.get('/all', (req, res) => {
   });
 });
 
+
+//getting catz
 app.get('/cat', (req, res) => {
   Cat.find()
     .where('age').gt(5)
@@ -78,6 +79,7 @@ app.get('/cat', (req, res) => {
 });
 
 
+//getting cat by name
 app.get('/cat/name/:name', (req, res) => {
   Cat.find()
     .where('name').equals(req.params.name)
@@ -92,6 +94,7 @@ app.get('/cat/name/:name', (req, res) => {
 });
 
 
+//getting cat with specific color
 app.get('/cat/color/:color', (req, res) => {
   Cat.find()
     .where('color').equals(req.params.color)
@@ -105,14 +108,9 @@ app.get('/cat/color/:color', (req, res) => {
       });
 });
 
-/*
-app.patch('/cat/:name', function (req, res) {
-  var updateObject = req.body; 
-  var name = req.params.name;
-  db.cat.update({name  : Object(name)}, {$set: updateObject});
-});*/
 
 
+//editing an existing cat
 app.post('/update', bodyParser.urlencoded({ extended: true }), (req, res) => {
   console.log('reqbody: ' + req.body);
   console.log('reqbodyname: ' + req.body.name);
@@ -129,8 +127,14 @@ app.post('/update', bodyParser.urlencoded({ extended: true }), (req, res) => {
     .then(
       d => {
         console.log('THIS IS THE D' + d);
-        Cat.updateOne({_id  : ObjectId(d.id)}).then(c => {
-          res.send('Cat edited: ' + c.name + ' :' + editedCat);
+        Cat.updateOne({ name: req.body.name }, {
+          name: req.body.name,
+          age: req.body.age,
+          gender: req.body.gender,
+          color: req.body.color,
+          weight: req.body.weight
+        }).then(c => {
+          res.send('Cat edited: ' + req.body.name);
         }, err => {
           res.send('Error: ' + err);
         });
@@ -143,19 +147,37 @@ app.post('/update', bodyParser.urlencoded({ extended: true }), (req, res) => {
 
 
 
-/*
-app.delete('/delete', (req, res) => {
-  //same way as update, just use delete.
-    const course = courses.find(c => c.id == parseInt(req.params.id));
-    if (!course) return res.status(404).send("Couldnt find course");
+//Deleting a ccatzzooo
+app.post('/delete', bodyParser.urlencoded({ extended: true }), (req, res) => {
+  console.log('reqbody: ' + req.body);
+  console.log('reqbodyname: ' + req.body.name);
+  const editedCat = {
+    name: req.body.name,
+   /* age: req.body.age,
+    gender: req.body.gender,
+    color: req.body.color,
+    weight: req.body.weight*/
+  };
 
-    const index = courses.indexOf(course);
-    courses.splice(index, 1);
+  Cat.find()
+    .where('name').equals(req.body.name)
+    .then(
+      d => {
+        console.log('THIS IS THE D' + d);
+        Cat.deleteOne({ name: req.body.name }).then(c => {
+          res.send('Cat deleted: ' + req.body.name);
+        }, err => {
+          res.send('Error: ' + err);
+        });
+      },
+      err => {
+        res.send('Error: ' + err);
+      });
 
-    res.send(course);
+});
 
-});*/
 
+//creating cat.
 app.post('/cat',
   bodyParser.urlencoded({ extended: true }),
   (req, res) => {
